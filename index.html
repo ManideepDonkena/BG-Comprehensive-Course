@@ -49,30 +49,141 @@
             <!-- Audio list will be populated by JavaScript -->
         </section>
 
-        <section id="player-section" class="player-card floating collapsed hidden" aria-label="Player">
+    <section id="player-section" class="player-card docked" aria-label="Player">
             <div class="player-header">
                 <div class="now-title" id="now-title">Not playing</div>
                 <div class="player-actions">
+                    <button id="player-notes-btn" class="icon-btn" title="Open notes panel" aria-label="Open notes panel" type="button">Notes</button>
                     <button id="player-fav-btn" class="icon-btn" title="Toggle favorite" aria-label="Toggle favorite" type="button">❤</button>
-                    <button id="player-collapse-btn" class="icon-btn" title="Expand/Collapse player" aria-label="Expand or collapse player" type="button">▾</button>
+                       <button id="player-collapse-btn" class="icon-btn" title="Expand/Collapse player" aria-label="Expand or collapse player" type="button">▾</button>
                 </div>
             </div>
             <div class="player-body">
-                <audio controls id="audio-player"></audio>
+                    <div class="progress-area" id="progress-area" role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+                        <div class="progress-rail" id="progress-rail">
+                            <div class="progress-fill" id="progress-fill"></div>
+                            <div class="progress-markers" id="progress-markers"></div>
+                            <div class="selection-range is-hidden" id="selection-range" aria-hidden="true"></div>
+                        </div>
+                        <div class="progress-times"><span id="current-time">0:00</span> / <span id="duration-time">0:00</span></div>
+                    </div>
+                <div class="controls-row" id="custom-controls" role="group" aria-label="Player controls">
+                    <div class="controls-left">
+                        <button id="btn-back-20" class="icon-btn" type="button" title="Back 20s" aria-label="Back 20 seconds">⏪ 20s</button>
+                        <button id="btn-play" class="icon-btn" type="button" title="Play/Pause" aria-label="Play or pause">▶</button>
+                        <button id="btn-forward-20" class="icon-btn" type="button" title="Forward 20s" aria-label="Forward 20 seconds">20s ⏩</button>
+                        <button id="btn-next" class="icon-btn" type="button" title="Next track" aria-label="Next track">⏭</button>
+                    </div>
+                    <div class="controls-mid">
+                        <label for="playback-rate" class="sr-only">Speed</label>
+                        <select id="playback-rate" aria-label="Playback speed">
+                            <option value="0.75">0.75×</option>
+                            <option value="1" selected>1.0×</option>
+                            <option value="1.25">1.25×</option>
+                            <option value="1.5">1.5×</option>
+                            <option value="1.75">1.75×</option>
+                            <option value="2">2.0×</option>
+                        </select>
+                    </div>
+                    <div class="controls-right">
+                        <button id="btn-mute" class="icon-btn" type="button" title="Mute/Unmute" aria-label="Mute or unmute">🔈</button>
+                        <label for="volume" class="sr-only">Volume</label>
+                        <input id="volume" type="range" min="0" max="1" step="0.01" value="1" aria-label="Volume" />
+                        <button id="btn-quick-note" class="icon-btn" type="button" title="Add note for current time" aria-label="Add note">📝</button>
+                    </div>
+                </div>
+                <div id="inline-notes" class="notes-list"></div>
+                <div id="note-compose" class="note-compose is-hidden" aria-live="polite">
+                    <div class="note-compose-row">
+                        <label for="note-text">Note</label>
+                        <textarea id="note-text" rows="2" placeholder="Type a short note about this segment..."></textarea>
+                    </div>
+                    <div class="note-compose-actions">
+                        <button id="save-note-btn" class="icon-btn" type="button">Save note</button>
+                        <button id="cancel-note-btn" class="icon-btn" type="button">Cancel</button>
+                        <span class="note-range-label" id="note-range-label"></span>
+                    </div>
+                </div>
+                <audio id="audio-player"></audio>
                 <div id="current-audio-info">
                     <!-- Current audio information will be displayed here by JavaScript -->
                 </div>
-                <div class="start-time-controls">
+               <!--<div class="start-time-controls">
                     <span id="start-time-label" class="start-time-label">Start at: 0:00</span>
-                    <!--
+                     
+                    <div class="markers-controls">
+                        <button id="add-marker-btn" class="icon-btn" type="button" title="Add marker at current time">Add marker</button>
+                    </div>
+                    <div class="markers-list" id="markers-list" aria-label="Markers list">
+                   
+                    </div>
                     <div class="start-time-actions">
                         <button id="set-start-btn" class="icon-btn" type="button" title="Set start to current time">Set start = Now</button>
                         <button id="clear-start-btn" class="icon-btn" type="button" title="Clear custom start time">Clear start</button>
                     </div>
-                    -->
-                </div>
+                    
+                </div> -->
             </div>
         </section>
+
+        <aside id="notes-panel" class="notes-panel is-hidden" aria-label="Notes panel" aria-expanded="false">
+            <div class="notes-header">
+                <strong>Notes</strong>
+                <div class="notes-actions">
+                    <button id="new-note-btn" class="icon-btn" type="button" title="Create a new note by selecting a start and end on the bar">New note</button>
+                    <button id="close-notes-btn" class="icon-btn" type="button" title="Close notes">✕</button>
+                </div>
+            </div>
+            <div id="notes-list" class="notes-list" aria-live="polite">
+                <!-- Notes will appear here -->
+            </div>
+        </aside>
+
+        <!-- Clip editor modal -->
+        <div id="clip-backdrop" class="clip-backdrop is-hidden" aria-hidden="true"></div>
+        <div id="clip-editor" class="clip-editor is-hidden" role="dialog" aria-modal="true" aria-labelledby="clip-title">
+            <div class="clip-header">
+                <h3 id="clip-title">Create note</h3>
+                <button id="clip-close" class="icon-btn" type="button" aria-label="Close">✕</button>
+            </div>
+            <div class="clip-body">
+                <div class="clip-inputs">
+                    <div class="clip-field">
+                        <label for="clip-start">Start</label>
+                        <input id="clip-start" type="text" value="0:00.0" aria-label="Start time" />
+                    </div>
+                    <div class="clip-field">
+                        <label for="clip-end">End</label>
+                        <input id="clip-end" type="text" value="0:15.0" aria-label="End time" />
+                    </div>
+                    <div class="clip-len" id="clip-length">0.0s</div>
+                </div>
+                <div class="clip-rail-wrap">
+                    <div id="clip-rail" class="clip-rail">
+                        <div id="clip-selection" class="clip-selection"></div>
+                        <div id="clip-handle-start" class="clip-handle" aria-label="Start handle" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+                        <div id="clip-handle-end" class="clip-handle" aria-label="End handle" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+                        <div id="clip-playhead" class="clip-playhead"></div>
+                    </div>
+                </div>
+                <div class="clip-transport">
+                    <button id="clip-back-5" class="icon-btn" type="button" title="Back 5s">−5s</button>
+                    <button id="clip-play" class="icon-btn" type="button" title="Play/Pause">Play</button>
+                    <button id="clip-fwd-5" class="icon-btn" type="button" title="Forward 5s">+5s</button>
+                    <button id="clip-set-start" class="icon-btn" type="button" title="Set start to playhead">Set start</button>
+                    <button id="clip-set-end" class="icon-btn" type="button" title="Set end to playhead">Set end</button>
+                    <label class="clip-loop"><input id="clip-loop" type="checkbox" /> Loop selection</label>
+                </div>
+                <div class="clip-note">
+                    <label for="clip-text">Note</label>
+                    <textarea id="clip-text" rows="3" placeholder="Add a note about this segment..."></textarea>
+                </div>
+            </div>
+            <div class="clip-actions">
+                <button id="clip-save" class="icon-btn" type="button">Save</button>
+                <button id="clip-cancel" class="icon-btn" type="button">Cancel</button>
+            </div>
+        </div>
     </main>
 
     <script src="script.js"></script>
