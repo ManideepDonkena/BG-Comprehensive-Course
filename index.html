@@ -1,0 +1,80 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BG Chapter Audio Player</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="site-header">
+        <h1>Bhagavad Gita Chapter Audio</h1>
+        <p class="subtitle">Browse, search, and play Bhakti Shastri class recordings</p>
+    </header>
+
+    <main class="container">
+        <section class="toolbar" aria-label="Filters and controls">
+            <div class="search-group">
+                <input type="search" id="search" placeholder="Search by title, speaker, or class type" aria-label="Search audio" />
+            </div>
+            <div class="sort-group">
+                <label for="sort">Sort by:</label>
+                <select id="sort" aria-label="Sort list">
+                    <option value="day-asc">Day (Asc)</option>
+                    <option value="day-desc">Day (Desc)</option>
+                    <option value="date-desc">Date (Newest)</option>
+                    <option value="date-asc">Date (Oldest)</option>
+                    <option value="title-asc">Title (A-Z)</option>
+                    <option value="title-desc">Title (Z-A)</option>
+                </select>
+            </div>
+            <div class="fav-filter">
+                <label class="checkbox">
+                    <input type="checkbox" id="filter-favorites" />
+                    Favorites only
+                </label>
+            </div>
+            <!--
+            <div class="export-group">
+                <button id="export-json-btn" class="icon-btn" type="button" title="Download updated JSON with start_time">Export JSON</button>
+            </div>
+            -->
+            <div class="results-count" aria-live="polite">
+                <span id="results-count">0</span> results
+            </div>
+        </section>
+
+        <section id="audio-list" class="card-grid" aria-label="Audio list">
+            <!-- Audio list will be populated by JavaScript -->
+        </section>
+
+        <section id="player-section" class="player-card floating collapsed hidden" aria-label="Player">
+            <div class="player-header">
+                <div class="now-title" id="now-title">Not playing</div>
+                <div class="player-actions">
+                    <button id="player-fav-btn" class="icon-btn" title="Toggle favorite" aria-label="Toggle favorite" type="button">❤</button>
+                    <button id="player-collapse-btn" class="icon-btn" title="Expand/Collapse player" aria-label="Expand or collapse player" type="button">▾</button>
+                </div>
+            </div>
+            <div class="player-body">
+                <audio controls id="audio-player"></audio>
+                <div id="current-audio-info">
+                    <!-- Current audio information will be displayed here by JavaScript -->
+                </div>
+                <div class="start-time-controls">
+                    <span id="start-time-label" class="start-time-label">Start at: 0:00</span>
+                    <!--
+                    <div class="start-time-actions">
+                        <button id="set-start-btn" class="icon-btn" type="button" title="Set start to current time">Set start = Now</button>
+                        <button id="clear-start-btn" class="icon-btn" type="button" title="Clear custom start time">Clear start</button>
+                    </div>
+                    -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
