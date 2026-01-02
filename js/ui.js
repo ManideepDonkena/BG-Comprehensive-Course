@@ -101,6 +101,7 @@ export function renderMarkers(markers, progressMarkersEl, markersListEl, duratio
             const delBtn = document.createElement('button');
             delBtn.className = 'icon-btn';
             delBtn.textContent = 'Remove';
+            delBtn.title = 'Remove marker';
             delBtn.addEventListener('click', () => removeCb(i));
 
             row.appendChild(left); row.appendChild(time); row.appendChild(goBtn); row.appendChild(delBtn);

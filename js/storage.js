@@ -50,5 +50,7 @@ export const prefsStore = {
     getRate: () => parseFloat(localStorage.getItem('bg_audio_rate') || '1') || 1,
     setRate: (v) => localStorage.setItem('bg_audio_rate', String(v)),
     getVolume: () => parseFloat(localStorage.getItem('bg_audio_volume') || '1') || 1,
-    setVolume: (v) => localStorage.setItem('bg_audio_volume', String(v))
+    setVolume: (v) => localStorage.setItem('bg_audio_volume', String(v)),
+    getTheme: () => localStorage.getItem('bg_audio_theme') || 'dark',
+    setTheme: (v) => localStorage.setItem('bg_audio_theme', v)
 };

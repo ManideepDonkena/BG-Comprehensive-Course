@@ -3,6 +3,7 @@ import { favoritesStore, customStartsStore, markersStore, notesStore, lastListen
 import { createItemElement, updateCurrentInfo, renderMarkers, renderNotes } from './ui.js';
 import { ClipEditor } from './clip-editor.js';
 import { TranscriptView } from './transcript.js';
+import { Tutorial } from './tutorial.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
@@ -80,7 +81,9 @@ document.addEventListener('DOMContentLoaded', () => {
             closeBtn: document.getElementById('close-transcript-btn'),
             searchInput: document.getElementById('transcript-search-input'),
             content: document.getElementById('transcript-content'),
-        }
+        },
+        helpBtn: document.getElementById('help-btn'),
+        themeToggle: document.getElementById('theme-toggle'),
     };
 
     // State
@@ -112,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const transcriptView = new TranscriptView(els.transcript, els.audioPlayer, (t) => seekTo(t));
+    const tutorial = new Tutorial();
 
     // --- Core Logic ---
 
@@ -548,6 +552,24 @@ document.addEventListener('DOMContentLoaded', () => {
         els.notesPanel.classList.add('is-hidden');
     });
 
+    // Player Collapse/Expand
+    const togglePlayerCollapse = () => {
+        const isCollapsed = els.playerSection.classList.toggle('collapsed');
+        els.playerCollapseBtn?.setAttribute('aria-expanded', String(!isCollapsed));
+    };
+
+    els.playerCollapseBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        togglePlayerCollapse();
+    });
+
+    // On mobile, also toggle on header click
+    document.querySelector('.player-header')?.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+            togglePlayerCollapse();
+        }
+    });
+
     // Transcript Toggle
     els.transcript.btn?.addEventListener('click', () => transcriptView.toggle());
 
@@ -577,6 +599,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const startVol = prefsStore.getVolume();
     els.audioPlayer.volume = startVol;
     if (els.volume) els.volume.value = String(startVol);
+
+    // Tutorial
+    els.helpBtn?.addEventListener('click', () => tutorial.show());
+    if (!localStorage.getItem('tutorial_seen')) {
+        setTimeout(() => tutorial.show(), 1500);
+    }
+
+    // Theme Toggle
+    const applyTheme = (theme) => {
+        document.documentElement.setAttribute('data-theme', theme);
+        prefsStore.setTheme(theme);
+        if (els.themeToggle) {
+            els.themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+        }
+    };
+
+    els.themeToggle?.addEventListener('click', () => {
+        const current = prefsStore.getTheme();
+        applyTheme(current === 'light' ? 'dark' : 'light');
+    });
+
+    // Initialize Theme
+    applyTheme(prefsStore.getTheme());
 
     // Initial Load
     fetch('./bg_chapter_info.json')
