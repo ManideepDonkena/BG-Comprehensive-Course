@@ -1,78 +1,104 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BG Chapter Audio Player</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <header class="site-header">
-        <h1>Bhagavad Gita Chapter Audio</h1>
-        <p class="subtitle">Browse, search, and play Bhakti Shastri class recordings</p>
+        <nav class="navbar">
+            <div class="nav-left">
+                <div class="brand">
+                    <img src="gita_wisdom_logo.png" alt="Logo" class="nav-logo" />
+                    <span>Gita Wisdom</span>
+                </div>
+            </div>
+            <div class="nav-right">
+                <div class="search-group" id="search-group">
+                    <button id="search-toggle" class="icon-btn search-toggle" type="button"
+                        title="Toggle Search">🔍</button>
+                    <div class="search-input-wrapper">
+                        <input type="search" id="search" placeholder="Search recordings..." aria-label="Search audio" />
+                    </div>
+                </div>
+
+                <div class="tool-separator"></div>
+
+                <div class="sort-group-wrapper">
+                    <button id="sort-toggle" class="icon-btn" type="button" title="Sort options">⇅</button>
+                    <div class="sort-dropdown" id="sort-dropdown">
+                        <select id="sort" aria-label="Sort list">
+                            <option value="day-asc">Day (Asc)</option>
+                            <option value="day-desc">Day (Desc)</option>
+                            <option value="date-desc">Date (Newest)</option>
+                            <option value="date-asc">Date (Oldest)</option>
+                            <option value="title-asc">Title (A-Z)</option>
+                            <option value="title-desc">Title (Z-A)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button id="filter-favorites-btn" class="icon-btn fav-filter-btn" type="button"
+                    title="Show favorites only">❤</button>
+                <input type="checkbox" id="filter-favorites" style="display: none;" />
+
+                <div class="results-count" aria-live="polite">
+                    <span id="results-count">0</span>
+                </div>
+            </div>
+        </nav>
+        <div class="header-content">
+            <h1>Gita Wisdom</h1>
+            <p class="subtitle">The Comprehensive Bhagavad Gita Course</p>
+        </div>
     </header>
 
     <main class="container">
-        <section class="toolbar" aria-label="Filters and controls">
-            <div class="search-group">
-                <input type="search" id="search" placeholder="Search by title, speaker, or class type" aria-label="Search audio" />
-            </div>
-            <div class="sort-group">
-                <label for="sort">Sort by:</label>
-                <select id="sort" aria-label="Sort list">
-                    <option value="day-asc">Day (Asc)</option>
-                    <option value="day-desc">Day (Desc)</option>
-                    <option value="date-desc">Date (Newest)</option>
-                    <option value="date-asc">Date (Oldest)</option>
-                    <option value="title-asc">Title (A-Z)</option>
-                    <option value="title-desc">Title (Z-A)</option>
-                </select>
-            </div>
-            <div class="fav-filter">
-                <label class="checkbox">
-                    <input type="checkbox" id="filter-favorites" />
-                    Favorites only
-                </label>
-            </div>
-            <!--
-            <div class="export-group">
-                <button id="export-json-btn" class="icon-btn" type="button" title="Download updated JSON with start_time">Export JSON</button>
-            </div>
-            -->
-            <div class="results-count" aria-live="polite">
-                <span id="results-count">0</span> results
-            </div>
-        </section>
+        <!-- Results count moved to nav, list follows -->
 
         <section id="audio-list" class="card-grid" aria-label="Audio list">
             <!-- Audio list will be populated by JavaScript -->
         </section>
 
-    <section id="player-section" class="player-card docked" aria-label="Player">
+        <section id="player-section" class="player-card docked" aria-label="Player">
             <div class="player-header">
                 <div class="now-title" id="now-title">Not playing</div>
                 <div class="player-actions">
-                    <button id="player-notes-btn" class="icon-btn" title="Open notes panel" aria-label="Open notes panel" type="button">Notes</button>
-                    <button id="player-fav-btn" class="icon-btn" title="Toggle favorite" aria-label="Toggle favorite" type="button">❤</button>
-                       <button id="player-collapse-btn" class="icon-btn" title="Expand/Collapse player" aria-label="Expand or collapse player" type="button">▾</button>
+                    <button id="player-transcript-btn" class="icon-btn" title="Open transcript"
+                        aria-label="Open transcript" type="button">📜</button>
+                    <button id="player-notes-btn" class="icon-btn" title="Open notes panel"
+                        aria-label="Open notes panel" type="button">Notes</button>
+                    <button id="player-fav-btn" class="icon-btn" title="Toggle favorite" aria-label="Toggle favorite"
+                        type="button">❤</button>
+                    <button id="player-collapse-btn" class="icon-btn" title="Expand/Collapse player"
+                        aria-label="Expand or collapse player" type="button">▾</button>
                 </div>
             </div>
             <div class="player-body">
-                    <div class="progress-area" id="progress-area" role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
-                        <div class="progress-rail" id="progress-rail">
-                            <div class="progress-fill" id="progress-fill"></div>
-                            <div class="progress-markers" id="progress-markers"></div>
-                            <div class="selection-range is-hidden" id="selection-range" aria-hidden="true"></div>
-                        </div>
-                        <div class="progress-times"><span id="current-time">0:00</span> / <span id="duration-time">0:00</span></div>
+                <div class="progress-area" id="progress-area" role="slider" aria-label="Seek" aria-valuemin="0"
+                    aria-valuemax="100" aria-valuenow="0" tabindex="0">
+                    <div class="progress-rail" id="progress-rail">
+                        <div class="progress-fill" id="progress-fill"></div>
+                        <div class="progress-markers" id="progress-markers"></div>
+                        <div class="selection-range is-hidden" id="selection-range" aria-hidden="true"></div>
                     </div>
+                    <div class="progress-times"><span id="current-time">0:00</span> / <span
+                            id="duration-time">0:00</span></div>
+                </div>
                 <div class="controls-row" id="custom-controls" role="group" aria-label="Player controls">
                     <div class="controls-left">
-                        <button id="btn-back-20" class="icon-btn" type="button" title="Back 20s" aria-label="Back 20 seconds">⏪ 20s</button>
-                        <button id="btn-play" class="icon-btn" type="button" title="Play/Pause" aria-label="Play or pause">▶</button>
-                        <button id="btn-forward-20" class="icon-btn" type="button" title="Forward 20s" aria-label="Forward 20 seconds">20s ⏩</button>
-                        <button id="btn-next" class="icon-btn" type="button" title="Next track" aria-label="Next track">⏭</button>
+                        <button id="btn-back-20" class="icon-btn" type="button" title="Back 20s"
+                            aria-label="Back 20 seconds">⏪ 20s</button>
+                        <button id="btn-play" class="icon-btn" type="button" title="Play/Pause"
+                            aria-label="Play or pause">▶</button>
+                        <button id="btn-forward-20" class="icon-btn" type="button" title="Forward 20s"
+                            aria-label="Forward 20 seconds">20s ⏩</button>
+                        <button id="btn-next" class="icon-btn" type="button" title="Next track"
+                            aria-label="Next track">⏭</button>
                     </div>
                     <div class="controls-mid">
                         <label for="playback-rate" class="sr-only">Speed</label>
@@ -86,29 +112,20 @@
                         </select>
                     </div>
                     <div class="controls-right">
-                        <button id="btn-mute" class="icon-btn" type="button" title="Mute/Unmute" aria-label="Mute or unmute">🔈</button>
+                        <button id="btn-mute" class="icon-btn" type="button" title="Mute/Unmute"
+                            aria-label="Mute or unmute">🔈</button>
                         <label for="volume" class="sr-only">Volume</label>
                         <input id="volume" type="range" min="0" max="1" step="0.01" value="1" aria-label="Volume" />
-                        <button id="btn-quick-note" class="icon-btn" type="button" title="Add note for current time" aria-label="Add note">📝</button>
+                        <button id="btn-quick-note" class="icon-btn" type="button" title="Add note for current time"
+                            aria-label="Add note">📝</button>
                     </div>
                 </div>
-                <div id="inline-notes" class="notes-list"></div>
-                <div id="note-compose" class="note-compose is-hidden" aria-live="polite">
-                    <div class="note-compose-row">
-                        <label for="note-text">Note</label>
-                        <textarea id="note-text" rows="2" placeholder="Type a short note about this segment..."></textarea>
-                    </div>
-                    <div class="note-compose-actions">
-                        <button id="save-note-btn" class="icon-btn" type="button">Save note</button>
-                        <button id="cancel-note-btn" class="icon-btn" type="button">Cancel</button>
-                        <span class="note-range-label" id="note-range-label"></span>
-                    </div>
-                </div>
+
                 <audio id="audio-player"></audio>
                 <div id="current-audio-info">
                     <!-- Current audio information will be displayed here by JavaScript -->
                 </div>
-               <!--<div class="start-time-controls">
+                <!--<div class="start-time-controls">
                     <span id="start-time-label" class="start-time-label">Start at: 0:00</span>
                      
                     <div class="markers-controls">
@@ -130,7 +147,8 @@
             <div class="notes-header">
                 <strong>Notes</strong>
                 <div class="notes-actions">
-                    <button id="new-note-btn" class="icon-btn" type="button" title="Create a new note by selecting a start and end on the bar">New note</button>
+                    <button id="new-note-btn" class="icon-btn" type="button"
+                        title="Create a new note by selecting a start and end on the bar">New note</button>
                     <button id="close-notes-btn" class="icon-btn" type="button" title="Close notes">✕</button>
                 </div>
             </div>
@@ -139,9 +157,28 @@
             </div>
         </aside>
 
+        <aside id="transcript-panel" class="transcript-panel is-hidden" aria-label="Transcript panel"
+            aria-expanded="false">
+            <div class="transcript-header">
+                <strong>Transcript</strong>
+                <div class="transcript-actions">
+                    <button id="close-transcript-btn" class="icon-btn" type="button" title="Close transcript">✕</button>
+                </div>
+            </div>
+            <div class="transcript-search">
+                <input type="text" id="transcript-search-input" placeholder="Search in transcript..."
+                    aria-label="Search in transcript" />
+            </div>
+            <div id="transcript-content" class="transcript-content" aria-live="polite">
+                <!-- Transcript lines will appear here -->
+                <div class="transcript-placeholder">Select a recording with a transcript available.</div>
+            </div>
+        </aside>
+
         <!-- Clip editor modal -->
         <div id="clip-backdrop" class="clip-backdrop is-hidden" aria-hidden="true"></div>
-        <div id="clip-editor" class="clip-editor is-hidden" role="dialog" aria-modal="true" aria-labelledby="clip-title">
+        <div id="clip-editor" class="clip-editor is-hidden" role="dialog" aria-modal="true"
+            aria-labelledby="clip-title">
             <div class="clip-header">
                 <h3 id="clip-title">Create note</h3>
                 <button id="clip-close" class="icon-btn" type="button" aria-label="Close">✕</button>
@@ -161,8 +198,10 @@
                 <div class="clip-rail-wrap">
                     <div id="clip-rail" class="clip-rail">
                         <div id="clip-selection" class="clip-selection"></div>
-                        <div id="clip-handle-start" class="clip-handle" aria-label="Start handle" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
-                        <div id="clip-handle-end" class="clip-handle" aria-label="End handle" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+                        <div id="clip-handle-start" class="clip-handle" aria-label="Start handle" role="slider"
+                            tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+                        <div id="clip-handle-end" class="clip-handle" aria-label="End handle" role="slider" tabindex="0"
+                            aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
                         <div id="clip-playhead" class="clip-playhead"></div>
                     </div>
                 </div>
@@ -170,8 +209,10 @@
                     <button id="clip-back-5" class="icon-btn" type="button" title="Back 5s">−5s</button>
                     <button id="clip-play" class="icon-btn" type="button" title="Play/Pause">Play</button>
                     <button id="clip-fwd-5" class="icon-btn" type="button" title="Forward 5s">+5s</button>
-                    <button id="clip-set-start" class="icon-btn" type="button" title="Set start to playhead">Set start</button>
-                    <button id="clip-set-end" class="icon-btn" type="button" title="Set end to playhead">Set end</button>
+                    <button id="clip-set-start" class="icon-btn" type="button" title="Set start to playhead">Set
+                        start</button>
+                    <button id="clip-set-end" class="icon-btn" type="button" title="Set end to playhead">Set
+                        end</button>
                     <label class="clip-loop"><input id="clip-loop" type="checkbox" /> Loop selection</label>
                 </div>
                 <div class="clip-note">
@@ -186,6 +227,19 @@
         </div>
     </main>
 
-    <script src="script.js"></script>
+    <template id="audio-item-template">
+        <h3 class="item-title"></h3>
+        <button class="icon-btn card-fav" title="Toggle favorite" aria-label="Toggle favorite" type="button">❤</button>
+        <div class="item-meta">
+            <span class="meta-day badge" hidden></span>
+            <span class="meta-type"></span>
+            <span class="meta-date"></span>
+            <span class="meta-speaker"></span>
+            <span class="meta-no-audio" style="color:#ef4444" hidden>• No audio link</span>
+        </div>
+    </template>
+
+    <script type="module" src="js/main.js"></script>
 </body>
+
 </html>
