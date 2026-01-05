@@ -656,60 +656,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const startVol = prefsStore.getVolume();
     els.audioPlayer.volume = startVol;
     // Tutorial
-    const startTutorial = (flow = 'main') => tutorial.start(flow);
-    window.startTutorial = startTutorial; // Make global for HTML clicks
-
-    // Help Menu Toggle
-    els.helpBtn?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const menu = document.getElementById('help-menu');
-        if (menu) {
-            const isVisible = menu.classList.contains('show');
-            // Close all other menus
-            document.querySelectorAll('.player-menu').forEach(m => m.classList.remove('show'));
-
-            if (!isVisible) menu.classList.add('show');
-        }
-    });
-
-    // Close menus on outside click (Generic)
-    window.addEventListener('click', (e) => {
-        if (!e.target.closest('.menu-wrap')) {
-            document.querySelectorAll('.player-menu').forEach(m => m.classList.remove('show'));
-        }
-    });
+    els.helpBtn?.addEventListener('click', () => tutorial.show());
 
     // Main Tutorial (First Visit)
-    if (!localStorage.getItem('tutorial_seen_main')) {
-        setTimeout(() => startTutorial('main'), 1500);
+    if (!localStorage.getItem('tutorial_seen')) {
+        setTimeout(() => tutorial.show(), 1500);
     }
 
     // Hero Tutorial Button
     const heroTutBtn = document.getElementById('hero-tutorial-btn');
     if (heroTutBtn) {
-        heroTutBtn.addEventListener('click', () => startTutorial('main'));
-    }
-
-    // Contextual Tutorial: Player Controls (triggered on opening menu)
-    const btnPlayerMenu = document.getElementById('btn-player-menu');
-    if (btnPlayerMenu) {
-        btnPlayerMenu.addEventListener('click', () => {
-            // Only show if not seen and overlay not already active
-            if (!localStorage.getItem('tutorial_seen_player') && document.querySelector('.tutorial-overlay.is-hidden')) {
-                // Small delay to let menu open first
-                setTimeout(() => startTutorial('player'), 500);
-            }
-        });
-    }
-
-    // Contextual Tutorial: Notes (triggered on opening notes)
-    const btnNotes = document.getElementById('player-notes-btn');
-    if (btnNotes) {
-        btnNotes.addEventListener('click', () => {
-            if (!localStorage.getItem('tutorial_seen_notes') && document.querySelector('.tutorial-overlay.is-hidden')) {
-                setTimeout(() => startTutorial('notes'), 500);
-            }
-        });
+        heroTutBtn.addEventListener('click', () => tutorial.show());
     }
 
     // Theme Toggle

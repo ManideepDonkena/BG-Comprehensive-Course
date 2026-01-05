@@ -3877,13 +3877,31 @@ input[type="range"]:hover::-webkit-slider-thumb {
 
 /* --- Help Menu Styles --- */
 .help-dropdown {
+    position: absolute;
     top: 130%;
     /* Drop DOWN */
-    bottom: auto !important;
-    /* Override player-menu bottom */
     right: 0;
-    min-width: 200px;
+    min-width: 220px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    z-index: 2000;
     transform-origin: top right;
+
+    /* Animation State */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px) scale(0.95);
+    transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.help-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
 }
 
 .menu-header-label {

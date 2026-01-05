@@ -1,88 +1,58 @@
 export class Tutorial {
     constructor() {
-        this.flows = {
-            main: [
-                {
-                    element: '.brand',
-                    title: 'Welcome to Bhakti Shastri',
-                    content: 'This guided course helps you study the Bhagavad Gita systematically.'
-                },
-                {
-                    element: '#nav-streak-btn',
-                    title: 'Daily Streak',
-                    content: 'Listen everyday to keep your spiritual fire burning!'
-                },
-                {
-                    element: '.profile-btn',
-                    title: 'Your Dashboard',
-                    content: 'Track your XP, Levels, and progress here.'
-                },
-                {
-                    element: '.audio-list',
-                    title: 'Audio Cards',
-                    content: 'Click cards to play. Hover for details.',
-                },
-                {
-                    element: '#player-section',
-                    title: 'Player Controls',
-                    content: 'Play, pause, and track progress here.'
-                }
-            ],
-            gamification: [
-                {
-                    element: '#nav-streak-btn',
-                    title: 'Daily Streak 🔥',
-                    content: 'Your streak increases every day you listen to a recording. Don\'t break the chain!'
-                },
-                {
-                    element: '.profile-btn',
-                    title: 'User Profile 👤',
-                    content: 'Click here to see your Level, XP, and detailed stats. Unlock badges as you progress.'
-                },
-                {
-                    element: '#results-count',
-                    title: 'Progress Tracking',
-                    content: 'Watch your completion count grow as you finish chapters.'
-                }
-            ],
-            player: [
-                {
-                    element: '#btn-player-menu',
-                    title: 'Advanced Controls',
-                    content: 'Click here to access Speed, Sleep Timer, and Markers.'
-                },
-                {
-                    element: '#playback-rate',
-                    title: 'Playback Speed',
-                    content: 'Adjust the audio speed (0.75x to 2x) to match your listening preference.'
-                },
-                {
-                    element: '#sleep-timer',
-                    title: 'Sleep Timer',
-                    content: 'Set a timer to automatically stop playback after a set time.'
-                },
-                {
-                    element: '#btn-add-marker',
-                    title: 'Bookmarks',
-                    content: 'Place a marker at the current time to easily jump back later.'
-                }
-            ],
-            notes: [
-                {
-                    element: '#new-note-btn', // Assuming this button is visible when panel opens
-                    title: 'Create Notes',
-                    content: 'Click "New Note" to save thoughts about the current audio.'
-                },
-                {
-                    element: '#notes-list',
-                    title: 'Your Collection',
-                    content: 'All your saved notes and clips for this recording appear here.'
-                }
-            ]
-        };
+        this.steps = [
+            {
+                element: '.brand',
+                title: 'Welcome to Bhakti Shastri',
+                content: 'This guided course helps you study the Bhagavad Gita systematically.'
+            },
+            {
+                element: '#nav-streak-btn',
+                title: 'Daily Streak 🔥',
+                content: 'Your streak increases every day you listen. Don\'t break the chain!'
+            },
+            {
+                element: '.profile-btn',
+                title: 'User Profile 👤',
+                content: 'Track your XP, Levels, and stats here. Unlock badges as you progress.'
+            },
+            {
+                element: '#search-toggle',
+                title: 'Search & Sort',
+                content: 'Find specific classes by title, day, or date.'
+            },
+            {
+                element: '.audio-list',
+                title: 'Audio Cards',
+                content: 'Click any card to play. Hover to see details.'
+            },
+            {
+                element: '#player-section',
+                title: 'Audio Player',
+                content: 'Control playback and see progress here.'
+            },
+            {
+                element: '#btn-player-menu',
+                title: 'Player Tools',
+                content: 'Access Playback Speed, Sleep Timer, and Bookmarks here.'
+            },
+            {
+                element: '#player-notes-btn',
+                title: 'Notes & Clips',
+                content: 'Create notes and save clips for the current recording.'
+            },
+            {
+                element: '#player-transcript-btn',
+                title: 'Transcript',
+                content: 'Read along with the audio transcript.'
+            },
+            {
+                element: '#top-feedback-link',
+                title: 'Feedback',
+                content: 'Help us improve by sharing your thoughts!'
+            }
+        ];
 
-        this.currentFlow = 'main';
-        this.steps = [];
         this.currentStep = 0;
         this.overlay = null;
         this.initialized = false;
@@ -91,7 +61,7 @@ export class Tutorial {
     init() {
         if (this.initialized) return;
 
-        // Create overlay elements (Same as before)
+        // Create overlay elements
         this.overlay = document.createElement('div');
         this.overlay.className = 'tutorial-overlay is-hidden';
         this.overlay.innerHTML = `
@@ -120,18 +90,9 @@ export class Tutorial {
         this.initialized = true;
     }
 
-    start(flowName = 'main') {
+    show() {
         this.init();
-
-        if (!this.flows[flowName]) {
-            console.error(`Tutorial flow '${flowName}' not found.`);
-            return;
-        }
-
-        this.currentFlow = flowName;
-        this.steps = this.flows[flowName];
         this.currentStep = 0;
-
         this.overlay.classList.remove('is-hidden');
         this.render();
     }
@@ -150,13 +111,9 @@ export class Tutorial {
             this.render();
         } else {
             this.hide();
-            // Mark specific flow as seen
-            localStorage.setItem(`tutorial_seen_${this.currentFlow}`, 'true');
-
-            // Dispatch event only for main tutorial
-            if (this.currentFlow === 'main') {
-                window.dispatchEvent(new CustomEvent('tutorial-complete'));
-            }
+            localStorage.setItem('tutorial_seen', 'true');
+            // Dispatch event for main.js to handle feedback timer
+            window.dispatchEvent(new CustomEvent('tutorial-complete'));
         }
     }
 
