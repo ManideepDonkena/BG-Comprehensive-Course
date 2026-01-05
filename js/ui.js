@@ -14,8 +14,11 @@ export function createItemElement(item, isFavorite, template) {
     const playable = !!hasPlayableUrl(item);
     let title = item.title || 'Untitled';
 
-    // Clean title: Remove "BG Chapter X-" or "BG Chapter X " prefix
-    title = title.replace(/^BG\s*Chapter\s*\d+[\s\-\(\)]*/, '').trim();
+    // Clean title: Remove "BG Chapter X-" or "BG Chapter X " prefix to show only section
+    // Regex covers: "BG Chapter 1-", "BG Chapter 2 - ", "BG Chapter 5 (5.1-6)" prefix removal if needed?
+    // User requested: "2nd section" instead of "BG Chapter 2- 2nd section"
+    // So we remove everything up to the first hyphen or just "BG Chapter \d+[- ]"
+    title = title.replace(/^BG\s*Chapter\s*\d+[\s-]*(\d+(\.\d+)?[-]\d+)?/, '').replace(/^[-\s]+/, '').trim();
 
     const classType = item.class_type || 'Class';
     const day = item.day != null ? item.day : '';
@@ -30,7 +33,7 @@ export function createItemElement(item, isFavorite, template) {
     if (popSubtitle) popSubtitle.textContent = title || 'Section';
 
     const descEl = clone.querySelector('.popover-description');
-    if (descEl) descEl.textContent = ''; // Hide description
+    if (descEl) descEl.style.display = 'none'; // User requested to hide description
 
     const cardEl = clone.querySelector('.audio-item');
     if (cardEl && isFavorite) {
@@ -44,6 +47,18 @@ export function createItemElement(item, isFavorite, template) {
 
     const noAudioEl = clone.querySelector('.meta-no-audio');
     if (noAudioEl) noAudioEl.hidden = playable;
+
+    // Force Hover via JS to resolve CSS hover issues
+    const audioContent = clone.querySelector('.audio-item');
+    if (audioContent) {
+        // Use pointer events for better hybrid support
+        audioContent.addEventListener('pointerenter', () => {
+            audioContent.classList.add('force-visible');
+        });
+        audioContent.addEventListener('pointerleave', () => {
+            audioContent.classList.remove('force-visible');
+        });
+    }
 
     return clone;
 }

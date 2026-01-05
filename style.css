@@ -537,6 +537,17 @@ select:focus {
     text-overflow: ellipsis;
 }
 
+#current-audio-info {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-top: 8px;
+    opacity: 0.9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .player-body {
     padding: 16px 24px 20px;
     display: flex;
@@ -670,6 +681,17 @@ select:focus {
     border-radius: 50%;
     font-size: 1.4rem;
     box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+}
+
+/* Specific styling for the text-based Notes button */
+#player-notes-btn {
+    width: auto !important;
+    padding: 0 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 8px;
+    gap: 6px;
+    letter-spacing: 0.02em;
 }
 
 #btn-play:hover {
@@ -2604,6 +2626,126 @@ input[type="range"]:hover::-webkit-slider-thumb {
 
 .audio-item.is-fav .item-fav-btn .heart-empty {
     display: none;
+}
+
+/* Audio Item Popover - Restore Description on Hover */
+.audio-item {
+    position: relative;
+    overflow: visible !important;
+    z-index: 1;
+    /* Base z-index */
+}
+
+.audio-item:hover {
+    z-index: 100;
+    /* Bring hovered item to top */
+}
+
+.audio-popover {
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 15px);
+    /* Move to right side */
+    transform: translateY(-50%) translateX(-10px);
+    background: #111;
+    border: 2px solid #f59e0b;
+    padding: 12px;
+    border-radius: 12px;
+    width: 180px;
+    /* User requested compact size */
+    width: 180px;
+    /* User requested compact size */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    opacity: 0;
+    visibility: hidden;
+    /* Back to visibility */
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 99999;
+}
+
+.audio-item:hover .audio-popover,
+.audio-item.force-visible .audio-popover,
+.audio-item:active .audio-popover {
+    /* display: block; */
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(-50%) translateX(0);
+}
+
+/* Popover Footer intentionally hidden */
+.popover-footer {
+    display: none;
+}
+
+/* Fix Hover Interaction - Ensure strictly hover-based */
+.audio-item {
+    position: relative;
+    overflow: visible !important;
+    z-index: 1;
+    touch-action: none;
+    /* Prevent scroll interference on touch */
+    cursor: pointer;
+    /* Reinforce it's interactive */
+}
+
+.audio-item:hover {
+    z-index: 1000;
+    /* High priority on hover */
+}
+
+/* Ensure no click/active weirdness */
+.audio-item:active .audio-popover {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Left Pointing Arrow - REMOVED per user request */
+.audio-popover::after {
+    display: none;
+}
+
+.item-fav-btn:hover {
+    transform: scale(1.1);
+}
+
+.popover-header {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--accent-primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+    padding-bottom: 4px;
+}
+
+.popover-subtitle {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0;
+    line-height: 1.3;
+    text-align: center;
+}
+
+.popover-description {
+    display: none;
+    /* Force hide description */
+}
+
+/* Arrow */
+.audio-popover::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 12px;
+    height: 12px;
+    background: var(--bg-card);
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .item-fav-btn:hover {
