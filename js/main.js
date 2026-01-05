@@ -4,6 +4,7 @@ import { createItemElement, updateCurrentInfo, renderMarkers, renderNotes } from
 import { ClipEditor } from './clip-editor.js';
 import { TranscriptView } from './transcript.js';
 import { Tutorial } from './tutorial.js';
+import { gamification } from './gamification.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
@@ -45,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnBack20: document.getElementById('btn-back-20'),
         btnPlay: document.getElementById('btn-play'),
         btnForward20: document.getElementById('btn-forward-20'),
+        btnPrev: document.getElementById('btn-prev'),
         btnNext: document.getElementById('btn-next'),
         playbackRate: document.getElementById('playback-rate'),
         volume: document.getElementById('volume'),
@@ -233,39 +235,56 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function renderList() {
+    function renderList(list = state.filteredItems) {
         els.audioList.innerHTML = '';
-        if (!state.filteredItems.length) {
+        let lastChapter = null;
+
+        if (!list.length) {
             els.audioList.innerHTML = '<div class="audio-item disabled"><h3 class="item-title">No results</h3></div>';
             return;
         }
 
-        state.filteredItems.forEach((item, idx) => {
-            const card = document.createElement('article');
-            card.className = 'audio-item';
-            card.tabIndex = 0;
-            const isFav = state.favorites.has(itemKey(item));
-            const content = createItemElement(item, isFav, els.itemTemplate);
-            card.appendChild(content);
-
-            if (!hasPlayableUrl(item)) {
-                card.classList.add('disabled');
-                card.setAttribute('aria-disabled', 'true');
+        list.forEach((item, idx) => {
+            // Insert Chapter Header if chapter changed
+            const chapter = item.chapter || 0;
+            if (chapter !== lastChapter) {
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'chapter-header';
+                headerDiv.innerHTML = `<h2>Chapter ${chapter}</h2><p>Bhagavad Gita</p>`;
+                els.audioList.appendChild(headerDiv);
+                lastChapter = chapter;
             }
 
-            card.addEventListener('click', () => tryPlay(idx));
-            card.addEventListener('keydown', (e) => {
+            const isFav = state.favorites.has(itemKey(item));
+            const card = createItemElement(item, isFav, els.itemTemplate);
+            const cardEl = card.querySelector('.audio-item');
+            if (!cardEl) return;
+
+            cardEl.tabIndex = 0;
+
+            if (!hasPlayableUrl(item)) {
+                cardEl.classList.add('disabled');
+                cardEl.setAttribute('aria-disabled', 'true');
+            }
+
+            // Click to play audio
+            cardEl.addEventListener('click', (e) => {
+                if (e.target.closest('.item-fav-btn')) return;
+                tryPlay(idx);
+            });
+
+            cardEl.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tryPlay(idx); }
             });
 
             // Heart button
-            const favBtn = card.querySelector('.card-fav');
+            const favBtn = cardEl.querySelector('.item-fav-btn');
             favBtn?.addEventListener('click', (e) => {
                 e.stopPropagation();
-                toggleFavorite(item); // this will trigger re-render
+                toggleFavorite(item);
             });
 
-            els.audioList.appendChild(card);
+            els.audioList.appendChild(cardEl);
         });
 
         if (els.resultsCount) els.resultsCount.textContent = String(state.filteredItems.length);
@@ -285,7 +304,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Sorting
         const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
         const byTitle = (a, b) => collator.compare(a.title || '', b.title || '');
-        const byDay = (a, b) => (a.day || 0) - (b.day || 0);
+        const byDay = (a, b) => {
+            const chA = Number(a.chapter) || 0;
+            const chB = Number(b.chapter) || 0;
+            if (chA !== chB) return chA - chB;
+            return (Number(a.day) || 0) - (Number(b.day) || 0);
+        };
         const byDate = (a, b) => (parseDate(a.date) || 0) - (parseDate(b.date) || 0);
 
         switch (sortMode) {
@@ -623,6 +647,39 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Theme
     applyTheme(prefsStore.getTheme());
 
+    // Update Nav Streak
+    const updateNavStreak = () => {
+        const streakEl = document.getElementById('nav-streak-val');
+        if (streakEl) streakEl.textContent = gamification.getStats().streak;
+    };
+    updateNavStreak();
+
+    // Level Up Modal Handler
+    const lvModal = document.getElementById('level-up-modal');
+    const lvVal = document.getElementById('new-level-val');
+    const lvClose = document.getElementById('level-up-close');
+
+    window.addEventListener('bg-level-up', (e) => {
+        if (!lvModal || !lvVal) return;
+        lvVal.textContent = e.detail.level;
+        lvModal.classList.remove('is-hidden');
+    });
+
+    lvClose?.addEventListener('click', () => {
+        lvModal.classList.add('is-hidden');
+    });
+
+    // Activity tracking during playback
+    let lastTrackTime = 0;
+    els.audioPlayer.addEventListener('timeupdate', () => {
+        const now = Date.now();
+        if (now - lastTrackTime > 60000 && !els.audioPlayer.paused) {
+            gamification.recordActivity(1); // Add 1 minute
+            lastTrackTime = now;
+            updateNavStreak();
+        }
+    });
+
     // Initial Load
     fetch('./bg_chapter_info.json')
         .then(res => res.ok ? res.json() : [])
@@ -642,6 +699,152 @@ document.addEventListener('DOMContentLoaded', () => {
             // Let's just merge: use saved if exists, else use file value.
             // Actually original code overwrites `customStarts` on load loop. 
             // Better behavior: Check if key exists in store, if not use file value.
+
+
+            // Quadrant-based Randomized Icon Placement (Better distribution)
+            const iconLayer = document.getElementById('scattered-icons');
+            if (iconLayer) {
+                const icons = Array.from(iconLayer.querySelectorAll('.icon-item'));
+                const cols = 4;
+                const rows = 2;
+                const cellW = 100 / cols;
+                const cellH = 100 / rows;
+
+                icons.forEach((icon, i) => {
+                    const row = Math.floor(i / cols);
+                    const col = i % cols;
+
+                    const top = (row * cellH) + (Math.random() * (cellH - 10)) + 5;
+                    const left = (col * cellW) + (Math.random() * (cellW - 10)) + 5;
+
+                    icon.style.top = `${top}%`;
+                    icon.style.left = `${left}%`;
+                    icon.style.transform = `rotate(${Math.random() * 20 - 10}deg)`;
+                    icon.style.animationDuration = `${6 + Math.random() * 6}s`;
+                    icon.style.animationDelay = `${Math.random() * -10}s`;
+                });
+            }
+
+            // Audio Seeking Logic (Click AND Drag)
+            if (els.progressArea) {
+                let isDragging = false;
+
+                const seek = (e) => {
+                    const rect = els.progressArea.getBoundingClientRect();
+                    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+                    const pct = x / rect.width;
+                    const dur = els.audioPlayer.duration;
+                    if (dur) {
+                        els.audioPlayer.currentTime = pct * dur;
+                        updateProgressUI();
+                    }
+                };
+
+                els.progressArea.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    seek(e);
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (isDragging) seek(e);
+                });
+
+                document.addEventListener('mouseup', () => {
+                    isDragging = false;
+                });
+
+                // Touch support for mobile
+                els.progressArea.addEventListener('touchstart', (e) => {
+                    isDragging = true;
+                    seek(e.touches[0]);
+                });
+
+                document.addEventListener('touchmove', (e) => {
+                    if (isDragging) seek(e.touches[0]);
+                });
+
+                document.addEventListener('touchend', () => {
+                    isDragging = false;
+                });
+            }
+
+            // 3-Dot Menu Toggle
+            const menuBtn = document.getElementById('btn-player-menu');
+            const menuPanel = document.getElementById('player-menu');
+            menuBtn?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                menuPanel?.classList.toggle('is-open');
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', () => {
+                menuPanel?.classList.remove('is-open');
+            });
+
+            menuPanel?.addEventListener('click', (e) => e.stopPropagation());
+
+            // Sleep Timer
+            let sleepTimerId = null;
+            const sleepTimerSelect = document.getElementById('sleep-timer');
+            sleepTimerSelect?.addEventListener('change', () => {
+                const mins = parseInt(sleepTimerSelect.value, 10);
+                if (sleepTimerId) clearTimeout(sleepTimerId);
+
+                if (mins > 0) {
+                    sleepTimerId = setTimeout(() => {
+                        els.audioPlayer.pause();
+                        sleepTimerSelect.value = '0';
+                        alert('Sleep timer ended. Audio paused.');
+                    }, mins * 60 * 1000);
+                }
+            });
+
+            // Loop Mode
+            const loopToggle = document.getElementById('loop-toggle');
+            loopToggle?.addEventListener('change', () => {
+                els.audioPlayer.loop = loopToggle.checked;
+            });
+
+            // Add Marker from menu
+            const addMarkerBtn = document.getElementById('btn-add-marker');
+            addMarkerBtn?.addEventListener('click', () => {
+                addMarker();
+                menuPanel?.classList.remove('is-open');
+            });
+
+            // Keyboard Shortcuts
+            document.addEventListener('keydown', (e) => {
+                // Don't trigger if typing in an input
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+
+                switch (e.code) {
+                    case 'Space':
+                        e.preventDefault();
+                        togglePlayPause();
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        seekTo(Math.max(0, els.audioPlayer.currentTime - 5));
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        seekTo(els.audioPlayer.currentTime + 5);
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        els.audioPlayer.volume = Math.min(1, els.audioPlayer.volume + 0.1);
+                        if (els.volume) els.volume.value = String(els.audioPlayer.volume);
+                        break;
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        els.audioPlayer.volume = Math.max(0, els.audioPlayer.volume - 0.1);
+                        if (els.volume) els.volume.value = String(els.audioPlayer.volume);
+                        break;
+                    case 'KeyM':
+                        els.audioPlayer.muted = !els.audioPlayer.muted;
+                        break;
+                }
+            });
 
             applyFilters();
             restoreLastListened();

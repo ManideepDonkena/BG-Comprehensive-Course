@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gita Wisdom - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="dashboard-page">
+    <header class="site-header thinner">
+        <nav class="navbar">
+            <div class="nav-left">
+                <a href="index.html" class="brand">
+                    <img src="gita_wisdom_logo.png" alt="Logo" class="nav-logo" />
+                    <span>Gita Wisdom</span>
+                </a>
+            </div>
+            <div class="nav-right">
+                <button id="theme-toggle" class="icon-btn" title="Toggle Mode">🌓</button>
+                <a href="index.html" class="icon-btn home-link" title="Go Home">🏠</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="dashboard-hero">
+            <div class="user-big-card">
+                <div class="user-avatar-wrap">
+                    <div class="avatar-current-container">
+                        <img src="assets/speaker-portrait.png" alt="User Avatar" class="user-avatar" id="user-avatar" />
+                        <button id="change-avatar-btn" class="avatar-edit-icon" title="Change Avatar">✏️</button>
+                    </div>
+                    <div class="level-badge" id="level-display">Lv 1</div>
+                </div>
+
+                <!-- Avatar Selection Modal/Panel (Hidden by default) -->
+                <div id="avatar-modal" class="avatar-modal is-hidden">
+                    <div class="avatar-modal-content">
+                        <h3>Choose Your Avatar</h3>
+                        <div class="avatar-options">
+                            <div class="avatar-option" data-id="arjun"><img src="assets/avatars/arjun.png"
+                                    alt="Arjun" /><span>Arjun</span></div>
+                            <div class="avatar-option" data-id="dhruv"><img src="assets/avatars/dhruv.png"
+                                    alt="Dhruv" /><span>Dhruv</span></div>
+                            <div class="avatar-option" data-id="prahlad"><img src="assets/avatars/prahlad.png"
+                                    alt="Prahlad" /><span>Prahlad</span></div>
+                            <div class="avatar-option" data-id="bharath"><img src="assets/avatars/bharath.png"
+                                    alt="Bharath" /><span>Bharath</span></div>
+                        </div>
+                        <div class="avatar-upload-section">
+                            <p>Or upload your own:</p>
+                            <input type="file" id="avatar-upload-input" accept="image/*" class="sr-only" />
+                            <label for="avatar-upload-input" class="btn-secondary">Upload Photo</label>
+                        </div>
+                        <button id="close-avatar-modal" class="btn-primary">Close</button>
+                    </div>
+                </div>
+                <div class="user-main-info">
+                    <h2 id="username-display">Aspirant</h2>
+                    <p class="joined-date">Member since <span id="joined-date">Jan 2026</span></p>
+                </div>
+                <div class="user-stats-grid">
+                    <div class="stat-box streak">
+                        <span class="stat-icon">🔥</span>
+                        <div class="stat-details">
+                            <strong id="streak-val">0</strong>
+                            <span>Day Streak</span>
+                        </div>
+                    </div>
+                    <div class="stat-box points">
+                        <span class="stat-icon">✨</span>
+                        <div class="stat-details">
+                            <strong id="points-val">0</strong>
+                            <span>Total Points</span>
+                        </div>
+                    </div>
+                    <div class="stat-box rank">
+                        <span class="stat-icon">🏆</span>
+                        <div class="stat-details">
+                            <strong id="rank-val">Seeker</strong>
+                            <span>Current Rank</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="dashboard-main">
+            <div class="dashboard-grid">
+                <!-- Daily Goal Card -->
+                <div class="dashboard-card daily-goal">
+                    <h3>Daily Progress</h3>
+                    <div class="progress-circle-wrap">
+                        <svg class="progress-circle" viewBox="0 0 100 100">
+                            <circle class="bg" cx="50" cy="50" r="45"></circle>
+                            <circle class="fg" id="goal-progress-bar" cx="50" cy="50" r="45"
+                                style="stroke-dasharray: 283; stroke-dashoffset: 283;"></circle>
+                        </svg>
+                        <div class="progress-center">
+                            <strong id="today-mins">0</strong>
+                            <span>/ <span id="goal-mins">15</span>m</span>
+                        </div>
+                    </div>
+
+                    <!-- Weekly Chart -->
+                    <div class="weekly-chart-container">
+                        <div class="weekly-bars" id="weekly-bars">
+                            <!-- Bars 1-7 (Mon-Sun) populated by JS -->
+                        </div>
+                        <div class="weekly-labels">
+                            <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+                        </div>
+                    </div>
+                    <p class="goal-hint">Complete your daily goal to build your streak!</p>
+                </div>
+
+                <!-- XP Progress Card -->
+                <div class="dashboard-card xp-timeline">
+                    <h3>Recent Activity</h3>
+                    <div id="activity-list" class="activity-list">
+                        <!-- Populated by JS -->
+                        <div class="empty-state">No activity recorded yet. Start a lesson to earn XP!</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="js/dashboard.js"></script>
+</body>
+
+</html>

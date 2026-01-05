@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BG Chapter Audio Player</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
@@ -14,7 +15,7 @@
             <div class="nav-left">
                 <div class="brand">
                     <img src="gita_wisdom_logo.png" alt="Logo" class="nav-logo" />
-                    <span>Bhakti Shastri</span>
+                    <span>Gita Wisdom</span>
                 </div>
             </div>
             <div class="nav-right">
@@ -46,6 +47,15 @@
                     title="Show favorites only">❤</button>
                 <input type="checkbox" id="filter-favorites" style="display: none;" />
 
+                <div class="tool-separator"></div>
+
+                <a href="dashboard.html" class="icon-btn streak-counter" id="nav-streak-btn" title="View Streak">
+                    <span class="streak-icon">🔥</span>
+                    <span id="nav-streak-val">0</span>
+                </a>
+
+                <a href="dashboard.html" class="icon-btn profile-btn" title="View Dashboard">👤</a>
+
                 <button id="theme-toggle" class="icon-btn theme-toggle" type="button"
                     title="Toggle Light/Dark Mode">🌓</button>
 
@@ -66,7 +76,7 @@
         <div class="container hero-container">
             <div class="hero-content">
                 <div class="hero-badge">A Comprehensive Journey</div>
-                <h1 class="hero-title">Bhakti Shastri</h1>
+                <h1 class="hero-title">Gita Wisdom</h1>
                 <p class="hero-subtitle">Experience the profound teachings of the Bhagavad Gita through a structured,
                     comprehensive course by H.G. Lila Purushottam Prabhuji.</p>
                 <div class="hero-cta">
@@ -87,9 +97,27 @@
     </section>
 
     <main class="container">
+        <!-- Kurukshetra Background Elements -->
+        <div class="kurukshetra-decor" aria-hidden="true">
+            <div class="chariot-silhouette"></div>
+            <div class="battle-flag"></div>
+            <div class="divine-rays"></div>
+            <!-- Scattered Gita Assets (Individual) -->
+            <div class="scattered-icons" id="scattered-icons">
+                <div class="icon-item gita-bow" style="top: 15%; left: 10%;"></div>
+                <div class="icon-item gita-feather" style="top: 40%; left: 85%;"></div>
+                <div class="icon-item gita-flute" style="top: 75%; left: 15%;"></div>
+                <div class="icon-item gita-lotus" style="top: 60%; left: 80%;"></div>
+                <div class="icon-item gita-conch" style="top: 85%; left: 45%;"></div>
+                <div class="icon-item gita-mace" style="top: 25%; left: 75%;"></div>
+                <div class="icon-item gita-wheel" style="top: 55%; left: 5%;"></div>
+                <div class="icon-item gita-diya" style="top: 90%; left: 80%;"></div>
+            </div>
+        </div>
+
         <!-- Results count moved to nav, list follows -->
 
-        <section id="audio-list" class="card-grid" aria-label="Audio list">
+        <section id="audio-list" class="path-container" aria-label="Audio list">
             <!-- Audio list will be populated by JavaScript -->
         </section>
 
@@ -118,35 +146,49 @@
                     <div class="progress-times"><span id="current-time">0:00</span> / <span
                             id="duration-time">0:00</span></div>
                 </div>
-                <div class="controls-row" id="custom-controls" role="group" aria-label="Player controls">
-                    <div class="controls-left">
-                        <button id="btn-back-20" class="icon-btn" type="button" title="Back 20s"
-                            aria-label="Back 20 seconds">⏪ 20s</button>
-                        <button id="btn-play" class="icon-btn" type="button" title="Play/Pause"
-                            aria-label="Play or pause">▶</button>
-                        <button id="btn-forward-20" class="icon-btn" type="button" title="Forward 20s"
-                            aria-label="Forward 20 seconds">20s ⏩</button>
-                        <button id="btn-next" class="icon-btn" type="button" title="Next track"
-                            aria-label="Next track">⏭</button>
+                <div class="controls-row" id="custom-controls">
+                    <button id="btn-back-20" class="icon-btn skip-btn" title="Back 20s">⏪<span>20</span></button>
+                    <button id="btn-prev" class="icon-btn" title="Previous">⏮</button>
+                    <button id="btn-play" class="icon-btn play-btn" title="Play/Pause">▶</button>
+                    <button id="btn-next" class="icon-btn" title="Next">⏭</button>
+                    <button id="btn-forward-20" class="icon-btn skip-btn" title="Forward 20s"><span>20</span>⏩</button>
+                    <div class="volume-wrap">
+                        <button id="btn-mute" class="icon-btn" title="Mute">🔈</button>
+                        <div class="volume-slider">
+                            <input id="volume" type="range" min="0" max="1" step="0.01" value="1" orient="vertical" />
+                        </div>
                     </div>
-                    <div class="controls-mid">
-                        <label for="playback-rate" class="sr-only">Speed</label>
-                        <select id="playback-rate" aria-label="Playback speed">
-                            <option value="0.75">0.75×</option>
-                            <option value="1" selected>1.0×</option>
-                            <option value="1.25">1.25×</option>
-                            <option value="1.5">1.5×</option>
-                            <option value="1.75">1.75×</option>
-                            <option value="2">2.0×</option>
-                        </select>
-                    </div>
-                    <div class="controls-right">
-                        <button id="btn-mute" class="icon-btn" type="button" title="Mute/Unmute"
-                            aria-label="Mute or unmute">🔈</button>
-                        <label for="volume" class="sr-only">Volume</label>
-                        <input id="volume" type="range" min="0" max="1" step="0.01" value="1" aria-label="Volume" />
-                        <button id="btn-quick-note" class="icon-btn" type="button" title="Add note for current time"
-                            aria-label="Add note">📝</button>
+                    <div class="menu-wrap">
+                        <button id="btn-player-menu" class="icon-btn menu-btn" title="More">⋮</button>
+                        <div class="player-menu" id="player-menu">
+                            <div class="menu-item">
+                                <label>Speed</label>
+                                <select id="playback-rate">
+                                    <option value="0.75">0.75×</option>
+                                    <option value="1" selected>1.0×</option>
+                                    <option value="1.25">1.25×</option>
+                                    <option value="1.5">1.5×</option>
+                                    <option value="1.75">1.75×</option>
+                                    <option value="2">2.0×</option>
+                                </select>
+                            </div>
+                            <div class="menu-item">
+                                <label>Sleep Timer</label>
+                                <select id="sleep-timer">
+                                    <option value="0">Off</option>
+                                    <option value="5">5 min</option>
+                                    <option value="10">10 min</option>
+                                    <option value="15">15 min</option>
+                                    <option value="30">30 min</option>
+                                    <option value="60">60 min</option>
+                                </select>
+                            </div>
+                            <div class="menu-item">
+                                <label>Loop</label>
+                                <input type="checkbox" id="loop-toggle" />
+                            </div>
+                            <button id="btn-add-marker" class="menu-btn-full" type="button">📍 Add Marker</button>
+                        </div>
                     </div>
                 </div>
 
@@ -154,21 +196,6 @@
                 <div id="current-audio-info">
                     <!-- Current audio information will be displayed here by JavaScript -->
                 </div>
-                <!--<div class="start-time-controls">
-                    <span id="start-time-label" class="start-time-label">Start at: 0:00</span>
-                     
-                    <div class="markers-controls">
-                        <button id="add-marker-btn" class="icon-btn" type="button" title="Add marker at current time">Add marker</button>
-                    </div>
-                    <div class="markers-list" id="markers-list" aria-label="Markers list">
-                   
-                    </div>
-                    <div class="start-time-actions">
-                        <button id="set-start-btn" class="icon-btn" type="button" title="Set start to current time">Set start = Now</button>
-                        <button id="clear-start-btn" class="icon-btn" type="button" title="Clear custom start time">Clear start</button>
-                    </div>
-                    
-                </div> -->
             </div>
         </section>
 
@@ -257,16 +284,42 @@
     </main>
 
     <template id="audio-item-template">
-        <h3 class="item-title"></h3>
-        <button class="icon-btn card-fav" title="Toggle favorite" aria-label="Toggle favorite" type="button">❤</button>
-        <div class="item-meta">
-            <span class="meta-day badge" hidden></span>
-            <span class="meta-type"></span>
-            <span class="meta-date"></span>
-            <span class="meta-speaker"></span>
-            <span class="meta-no-audio" style="color:#ef4444" hidden>• No audio link</span>
+        <div class="audio-item">
+            <div class="item-card-inner">
+                <span class="meta-day"></span>
+                <i class="fas fa-play play-icon"></i>
+                <button class="item-fav-btn" title="Mark as Favorite" aria-label="Favorite">
+                    <i class="far fa-heart heart-empty"></i>
+                    <i class="fas fa-heart heart-filled"></i>
+                </button>
+            </div>
+            <!-- Refined Hover Popover (Reordered for clarity) -->
+            <div class="item-title">
+                <div class="popover-header">
+                    <span class="meta-date"></span><!-- Chapter/Section -->
+                </div>
+                <div class="popover-body">
+                    <div class="popover-subtitle"></div>
+                    <div class="popover-description"></div>
+                </div>
+                <div class="popover-footer">Click to begin lesson</div>
+            </div>
         </div>
     </template>
+
+    <!-- Premium Level Up Modal -->
+    <div id="level-up-modal" class="level-up-modal is-hidden">
+        <div class="level-up-content">
+            <div class="level-up-shine"></div>
+            <div class="level-up-badge">
+                <i class="fas fa-crown"></i>
+            </div>
+            <h2>Level Up!</h2>
+            <p>You've reached Level <span id="new-level-val">1</span></p>
+            <div class="level-up-xp">Keep going for your next streak!</div>
+            <button id="level-up-close" class="level-up-btn">Continue</button>
+        </div>
+    </div>
 
     <script type="module" src="js/main.js"></script>
 </body>

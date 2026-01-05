@@ -12,37 +12,38 @@ export function createItemElement(item, isFavorite, template) {
     const clone = template.content.cloneNode(true);
 
     const playable = !!hasPlayableUrl(item);
-    const title = item.title || 'Untitled';
-    const speaker = item.speaker || 'Unknown speaker';
+    let title = item.title || 'Untitled';
+
+    // Clean title: Remove "BG Chapter X-" or "BG Chapter X " prefix
+    title = title.replace(/^BG\s*Chapter\s*\d+[\s\-\(\)]*/, '').trim();
+
     const classType = item.class_type || 'Class';
-    const day = item.day != null ? `Day ${item.day}` : '';
-    const date = item.date || '';
+    const day = item.day != null ? item.day : '';
+    const chapter = item.chapter != null ? `Chapter ${item.chapter}` : '';
 
-    clone.querySelector('.item-title').textContent = title;
 
-    const favBtn = clone.querySelector('.card-fav');
-    if (isFavorite) {
-        favBtn.classList.add('active');
-        favBtn.setAttribute('aria-pressed', 'true');
+    // Popover Content (Simplified: just section name)
+    const popMeta = clone.querySelector('.meta-date');
+    if (popMeta) popMeta.textContent = chapter || classType;
+
+    const popSubtitle = clone.querySelector('.popover-subtitle');
+    if (popSubtitle) popSubtitle.textContent = title || 'Section';
+
+    const descEl = clone.querySelector('.popover-description');
+    if (descEl) descEl.textContent = ''; // Hide description
+
+    const cardEl = clone.querySelector('.audio-item');
+    if (cardEl && isFavorite) {
+        cardEl.classList.add('is-fav');
     }
 
     const badge = clone.querySelector('.meta-day');
-    if (day) {
+    if (badge && day !== '') {
         badge.textContent = day;
-        badge.hidden = false;
     }
 
-    const typeEl = clone.querySelector('.meta-type');
-    if (classType) typeEl.textContent = classType;
-
-    const dateEl = clone.querySelector('.meta-date');
-    if (date) dateEl.textContent = `• ${date}`;
-
-    const speakerEl = clone.querySelector('.meta-speaker');
-    if (speaker) speakerEl.textContent = `• ${speaker}`;
-
     const noAudioEl = clone.querySelector('.meta-no-audio');
-    if (!playable && noAudioEl) noAudioEl.hidden = false;
+    if (noAudioEl) noAudioEl.hidden = playable;
 
     return clone;
 }
