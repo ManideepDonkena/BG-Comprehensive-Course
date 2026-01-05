@@ -16,8 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
         searchGroup: document.getElementById('search-group'),
         searchToggle: document.getElementById('search-toggle'),
         sort: document.getElementById('sort'),
-        sortToggle: document.getElementById('sort-toggle'),
-        sortWrapper: document.querySelector('.sort-group-wrapper'),
         favBtn: document.getElementById('filter-favorites-btn'),
         resultsCount: document.getElementById('results-count'),
         favCheckbox: document.getElementById('filter-favorites'),
@@ -53,6 +51,10 @@ document.addEventListener('DOMContentLoaded', () => {
         btnMute: document.getElementById('btn-mute'),
         quickNoteBtn: document.getElementById('btn-quick-note'),
 
+        // Mini Player
+        btnMiniPlay: document.getElementById('btn-mini-play'),
+        progressRingCircle: document.querySelector('.progress-ring__circle'),
+
         // Clip Editor
         clip: {
             el: document.getElementById('clip-editor'),
@@ -84,6 +86,10 @@ document.addEventListener('DOMContentLoaded', () => {
             searchInput: document.getElementById('transcript-search-input'),
             content: document.getElementById('transcript-content'),
         },
+        // Mobile Menu
+        navMenuToggle: document.getElementById('nav-menu-toggle'),
+        navMenuContent: document.getElementById('nav-menu-content'),
+
         helpBtn: document.getElementById('help-btn'),
         themeToggle: document.getElementById('theme-toggle'),
     };
@@ -158,6 +164,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function seekTo(seconds) {
         const s = Math.max(0, Math.min(seconds, (els.audioPlayer.duration || 0) - 0.5));
         try { els.audioPlayer.currentTime = s; } catch { }
+    }
+
+    function togglePlay() {
+        if (els.audioPlayer.paused) {
+            els.audioPlayer.play().catch(() => { });
+        } else {
+            els.audioPlayer.pause();
+        }
     }
 
     function tryPlay(idxInFiltered) {
@@ -491,14 +505,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    els.sortToggle?.addEventListener('click', (e) => {
+    els.navMenuToggle?.addEventListener('click', (e) => {
         e.stopPropagation();
-        els.sortWrapper?.classList.toggle('active');
+        els.navMenuContent?.classList.toggle('is-open');
     });
 
     document.addEventListener('click', (e) => {
-        if (els.sortWrapper && !els.sortWrapper.contains(e.target)) {
-            els.sortWrapper.classList.remove('active');
+        if (els.navMenuContent && !els.navMenuContent.contains(e.target)) {
+            els.navMenuContent.classList.remove('is-open');
         }
     });
 
@@ -510,20 +524,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     els.sort?.addEventListener('change', () => {
         applyFilters();
-        els.sortWrapper?.classList.remove('active');
+        els.navMenuContent?.classList.remove('is-open');
     });
 
     els.favCheckbox?.addEventListener('change', applyFilters);
 
     // Audio Player Events
     els.btnPlay?.addEventListener('click', () => {
-        if (els.audioPlayer.paused) {
-            els.audioPlayer.play().catch(() => { });
-            els.btnPlay.textContent = '⏸';
-        } else {
-            els.audioPlayer.pause();
-            els.btnPlay.textContent = '▶';
-        }
+        togglePlay();
     });
 
     els.audioPlayer.addEventListener('play', () => { if (els.btnPlay) els.btnPlay.textContent = '⏸'; });
@@ -576,24 +584,6 @@ document.addEventListener('DOMContentLoaded', () => {
         els.notesPanel.classList.add('is-hidden');
     });
 
-    // Player Collapse/Expand
-    const togglePlayerCollapse = () => {
-        const isCollapsed = els.playerSection.classList.toggle('collapsed');
-        els.playerCollapseBtn?.setAttribute('aria-expanded', String(!isCollapsed));
-    };
-
-    els.playerCollapseBtn?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        togglePlayerCollapse();
-    });
-
-    // On mobile, also toggle on header click
-    document.querySelector('.player-header')?.addEventListener('click', () => {
-        if (window.innerWidth <= 768) {
-            togglePlayerCollapse();
-        }
-    });
-
     // Transcript Toggle
     els.transcript.btn?.addEventListener('click', () => transcriptView.toggle());
 
@@ -603,6 +593,49 @@ document.addEventListener('DOMContentLoaded', () => {
         const t = Math.floor(els.audioPlayer.currentTime || 0);
         clipEditor.open(t, t + 10);
     });
+
+    // --- Mini Player & Collapse Logic ---
+    const toggleCollapse = (e) => {
+        if (e) e.stopPropagation();
+        const card = els.playerSection;
+        const isCollapsed = card.classList.toggle('collapsed');
+        console.log('Player collapsed:', isCollapsed);
+
+        // Update ARIA for accessibility
+        els.playerCollapseBtn?.setAttribute('aria-expanded', String(!isCollapsed));
+    };
+
+    els.playerCollapseBtn?.addEventListener('click', toggleCollapse);
+
+    // Mini Play Button
+    els.btnMiniPlay?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        console.log('Mini play clicked');
+        togglePlay();
+    });
+
+    // Expand on tap (if not clicking mini-controls or other buttons)
+    const playerHeader = document.querySelector('.player-header');
+    playerHeader?.addEventListener('click', (e) => {
+        const card = els.playerSection;
+        if (card.classList.contains('collapsed')) {
+            // If they clicked the header but NOT a specific button/control inside it
+            if (!e.target.closest('.mini-controls') && !e.target.closest('.player-actions')) {
+                console.log('Expanding via header tap');
+                card.classList.remove('collapsed');
+                els.playerCollapseBtn?.setAttribute('aria-expanded', 'true');
+            }
+        }
+    });
+
+    // Sync Mini-Play Icon
+    els.audioPlayer.addEventListener('play', () => {
+        if (els.btnMiniPlay) els.btnMiniPlay.textContent = '⏸';
+    });
+    els.audioPlayer.addEventListener('pause', () => {
+        if (els.btnMiniPlay) els.btnMiniPlay.textContent = '▶';
+    });
+    // ------------------------------------
 
     // Markers
     els.addMarkerBtn?.addEventListener('click', addMarker);
@@ -669,7 +702,7 @@ document.addEventListener('DOMContentLoaded', () => {
         lvModal.classList.add('is-hidden');
     });
 
-    // Activity tracking during playback
+    // Activity tracking & Progress Sync
     let lastTrackTime = 0;
     els.audioPlayer.addEventListener('timeupdate', () => {
         const now = Date.now();
@@ -677,6 +710,18 @@ document.addEventListener('DOMContentLoaded', () => {
             gamification.recordActivity(1); // Add 1 minute
             lastTrackTime = now;
             updateNavStreak();
+        }
+
+        // Sync Mini-Player Circular Progress
+        // Sync Mini-Player Circular Progress
+        if (els.progressRingCircle && els.audioPlayer.duration) {
+            const radius = els.progressRingCircle.r.baseVal.value || 18;
+            const circumference = radius * 2 * Math.PI;
+            const progress = (els.audioPlayer.currentTime / els.audioPlayer.duration) || 0;
+            const offset = circumference - (progress * circumference);
+
+            els.progressRingCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+            els.progressRingCircle.style.strokeDashoffset = offset;
         }
     });
 
@@ -701,27 +746,52 @@ document.addEventListener('DOMContentLoaded', () => {
             // Better behavior: Check if key exists in store, if not use file value.
 
 
-            // Quadrant-based Randomized Icon Placement (Better distribution)
+            // Interactive & Random Roaming Background Icons
             const iconLayer = document.getElementById('scattered-icons');
             if (iconLayer) {
-                const icons = Array.from(iconLayer.querySelectorAll('.icon-item'));
-                const cols = 4;
-                const rows = 2;
-                const cellW = 100 / cols;
-                const cellH = 100 / rows;
-
+                const icons = Array.from(iconLayer.querySelectorAll('.icon-item.roaming'));
                 icons.forEach((icon, i) => {
-                    const row = Math.floor(i / cols);
-                    const col = i % cols;
+                    const side = i % 2 === 0 ? 'left' : 'right';
+                    const iconsPerSide = icons.length / 2;
+                    const sideIndex = Math.floor(i / 2);
 
-                    const top = (row * cellH) + (Math.random() * (cellH - 10)) + 5;
-                    const left = (col * cellW) + (Math.random() * (cellW - 10)) + 5;
+                    const roam = () => {
+                        // Vertical Slotting: Divide screen into icon.length/2 vertical zones
+                        const slotHeight = 90 / iconsPerSide;
+                        const slotTop = (sideIndex * slotHeight) + 5;
 
-                    icon.style.top = `${top}%`;
-                    icon.style.left = `${left}%`;
-                    icon.style.transform = `rotate(${Math.random() * 20 - 10}deg)`;
-                    icon.style.animationDuration = `${6 + Math.random() * 6}s`;
-                    icon.style.animationDelay = `${Math.random() * -10}s`;
+                        // Keep icons in side gutters (0-15% or 85-100%)
+                        const x = side === 'left'
+                            ? Math.random() * 15
+                            : 85 + Math.random() * 15;
+
+                        // Randomize Y within its assigned slot to prevent clustering
+                        const y = slotTop + (Math.random() * slotHeight);
+
+                        const duration = 20 + Math.random() * 20;
+
+                        icon.style.transition = `left ${duration}s linear, top ${duration}s linear, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease, filter 0.4s ease`;
+                        icon.style.left = `${x}%`;
+                        icon.style.top = `${y}%`;
+
+                        setTimeout(roam, duration * 1000);
+                    };
+
+                    // Initial setup
+                    icon.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    icon.style.opacity = '0';
+                    setTimeout(() => { icon.style.opacity = '0.6'; roam(); }, i * 300);
+
+                    // Touch/Hover Interaction
+                    const activate = () => {
+                        icon.classList.add('is-active');
+                        setTimeout(() => icon.classList.remove('is-active'), 3000);
+                    };
+                    icon.addEventListener('mouseenter', activate);
+                    icon.addEventListener('touchstart', (e) => {
+                        activate();
+                        // Optional: don't preventDefault so scrolling still works
+                    }, { passive: true });
                 });
             }
 
@@ -820,7 +890,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 switch (e.code) {
                     case 'Space':
                         e.preventDefault();
-                        togglePlayPause();
+                        togglePlay();
                         break;
                     case 'ArrowLeft':
                         e.preventDefault();

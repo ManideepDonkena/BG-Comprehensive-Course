@@ -21,18 +21,21 @@ export class TranscriptView {
     }
 
     async load(dayNumber) {
+        console.log('TranscriptView: Attempting to load Day', dayNumber);
         this.els.content.innerHTML = `<div class="transcript-placeholder">Loading transcript for Day ${dayNumber}...</div>`;
         this.lines = [];
         this.activeLineIdx = -1;
 
         try {
             const resp = await fetch(`./Transcript/Day-${dayNumber}.txt`);
+            console.log('TranscriptView: Fetch response', resp.status, resp.ok);
             if (!resp.ok) throw new Error('Not found');
-            const text = await resp.ok ? await resp.text() : '';
+            const text = await resp.text();
+            console.log('TranscriptView: Fetched text length', text.length);
             this.parse(text);
             this.render();
         } catch (e) {
-            console.warn('Transcript not found for Day', dayNumber);
+            console.warn('TranscriptView: Error loading Day', dayNumber, e);
             this.els.content.innerHTML = `<div class="transcript-placeholder">No transcript available for this recording.</div>`;
         }
     }
@@ -62,6 +65,7 @@ export class TranscriptView {
                 raw: fullText
             };
         }).filter(Boolean);
+        console.log('TranscriptView: Parsed lines count', this.lines.length);
     }
 
     toSeconds(hms) {
